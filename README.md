@@ -1,4 +1,13 @@
 # API Development and Documentation Final Project
+## frontend
+cd /Users/yosukeota/Documents/GitHub/cd0037-API-Development-and-Documentation-project/frontend
+npm start
+
+## backend
+cd /Users/yosukeota/Documents/GitHub/cd0037-API-Development-and-Documentation-project/backend
+export FLASK_APP=flaskr
+export FLASK_ENV=development
+flask run
 
 ## Trivia App
 
