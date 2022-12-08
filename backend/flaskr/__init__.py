@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -50,21 +51,17 @@ def create_app(test_config=None):
     def retrieve_categories():
         categories = Category.query.order_by(Category.id).all()
         formatted_categories = [category.format() for category in categories]
-        print(formatted_categories)
-        print(formatted_categories[0])
-        return jsonify(
+        category_list = {}
+        for n in formatted_categories:
+            category_list[str(n['id'])]=n['type']
+
+        global result
+        result = jsonify(
             {
-                "categories":
-                {
-                    formatted_categories[0]["id"]:formatted_categories[0]["type"],
-                    formatted_categories[1]["id"]:formatted_categories[1]["type"],
-                    formatted_categories[2]["id"]:formatted_categories[2]["type"],
-                    formatted_categories[3]["id"]:formatted_categories[3]["type"],
-                    formatted_categories[4]["id"]:formatted_categories[4]["type"],
-                    formatted_categories[5]["id"]:formatted_categories[5]["type"],
-                }
+                "categories":category_list
             }
         )
+        return result
 
     """
     @TODO:
@@ -83,16 +80,21 @@ def create_app(test_config=None):
         selection = Question.query.order_by(Question.id).all()
         print(selection)
         current_questions = paginate_questions(request, selection)
+        result = retrieve_categories()
+        # test = json.dumps(result.__dict__)
+        # print(test)
+        print(result)
         if len(current_questions) == 0:
             abort(404)
             
-        return jsonify(
+        test = jsonify(
             {
-                "success": True,
                 "questions": current_questions,
-                "total_questions": len(Question.query.all())
+                "total_questions": len(Question.query.all()),
+                "categories":result
             }
         )
+        return test
 
     """
     @TODO:
