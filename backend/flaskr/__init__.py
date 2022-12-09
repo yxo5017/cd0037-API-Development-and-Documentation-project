@@ -75,26 +75,28 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
-    @app.route("/")
+    @app.route("/questions")
     def retrieve_questions():
+ 
         selection = Question.query.order_by(Question.id).all()
-        print(selection)
         current_questions = paginate_questions(request, selection)
-        result = retrieve_categories()
-        # test = json.dumps(result.__dict__)
-        # print(test)
-        print(result)
+
+        categories = Category.query.order_by(Category.id).all()
+        formatted_categories = [category.format() for category in categories]
+        category_list = {}
+        for n in formatted_categories:
+            category_list[str(n['id'])]=n['type']
         if len(current_questions) == 0:
             abort(404)
-            
-        test = jsonify(
+
+        question_list = jsonify(
             {
                 "questions": current_questions,
                 "total_questions": len(Question.query.all()),
-                "categories":result
+                "categories":category_list
             }
         )
-        return test
+        return question_list
 
     """
     @TODO:
@@ -103,6 +105,22 @@ def create_app(test_config=None):
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
+    @app.route('/questions/<int:question_id>', methods=['DELETE'])
+    def delete_question(question_id):
+        try:
+            question = Question.query.filter(Question.id == question_id).one_or_none()
+            if question is None:
+                abort(404)
+
+            question.delete()
+            selection = Question.query.order_by(Question.id).all()
+            current_questions = paginate_questions(request, selection)
+
+            return jsonify({
+                'success': True
+            })
+        except:
+            abort(422)
 
     """
     @TODO:
@@ -114,7 +132,31 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
+    @app.route('/questions', methods=['POST'])
+    def create_question():
+        body = request.get_json()
+        new_question = body.get('question', None)
+        new_answer = body.get('answer', None)
+        new_difficulty = body.get('difficulty', None)
+        new_category = body.get('category', None)
 
+        try:
+            question = Question(question=new_question, answer=new_answer, difficulty=new_difficulty, category=new_category)
+            question.insert()
+
+            selection = Question.query.order_by(Question.id).all()
+            current_questions = paginate_questions(request, selection)
+
+            return jsonify({
+                'success': True,
+                'question':new_question,
+                'difficulty':new_difficulty,
+                'category':new_category
+            })
+
+        except:
+            abort(422)
+    return app
     """
     @TODO:
     Create a POST endpoint to get questions based on a search term.
@@ -125,7 +167,32 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-
+    @app.route('/questions', methods=['POST'])
+    def search_question():
+        search_term = request.form.get('search_term', '')
+        try:
+            selection = Question.query.order_by(Question.id).filter(Question.question.ilike("%{}%".format(search_term)))
+            current_questions = paginate_questions(request, selection)
+            print(selection)
+            return jsonify(
+                {
+                    "questions": [
+                        {
+                            "id": selection.id,
+                            "question": selection.question,
+                            "answer": selection.answer,
+                            "difficulty": selection.difficulty,
+                            "category": selection.category
+                        }
+                    ],
+                    "totalQuestions": len(Question.query.all()),
+                    "currentCategory": "Entertainment"
+                }
+            )
+        except:
+            abort(422)
+    
+    
     """
     @TODO:
     Create a GET endpoint to get questions based on category.
