@@ -167,30 +167,36 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-    @app.route('/questions', methods=['POST'])
+    @app.route("/search")
     def search_question():
-        search_term = request.form.get('search_term', '')
-        try:
-            selection = Question.query.order_by(Question.id).filter(Question.question.ilike("%{}%".format(search_term)))
-            current_questions = paginate_questions(request, selection)
-            print(selection)
-            return jsonify(
-                {
-                    "questions": [
-                        {
-                            "id": selection.id,
-                            "question": selection.question,
-                            "answer": selection.answer,
-                            "difficulty": selection.difficulty,
-                            "category": selection.category
-                        }
-                    ],
-                    "totalQuestions": len(Question.query.all()),
-                    "currentCategory": "Entertainment"
-                }
-            )
-        except:
-            abort(422)
+        result = jsonify(
+            {
+                "search":"search"
+            }
+        )
+        return result
+
+        # try:
+        #     selection = Question.query.order_by(Question.id).filter(Question.question.ilike("%{}%".format(search_term)))
+        #     current_questions = paginate_questions(request, selection)
+        #     print(selection)
+        #     return jsonify(
+        #         {
+        #             "questions": [
+        #                 {
+        #                     "id": selection.id,
+        #                     "question": selection.question,
+        #                     "answer": selection.answer,
+        #                     "difficulty": selection.difficulty,
+        #                     "category": selection.category
+        #                 }
+        #             ],
+        #             "totalQuestions": len(Question.query.all()),
+        #             "currentCategory": selection.category
+        #         }
+        #     )
+        # except:
+        #     abort(422)
     
     
     """
