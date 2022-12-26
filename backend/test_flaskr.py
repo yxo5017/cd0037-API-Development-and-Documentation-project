@@ -24,6 +24,15 @@ class TriviaTestCase(unittest.TestCase):
             "difficulty": 2,
             "category": 2,
         }
+        self.search_word = {
+            "searchTerm": "Whose"
+        }
+
+        self.quiz_page = {
+            "quiz_category": {
+                "id":1
+            }
+        }
 
         # binds the app to the current context
         with self.app.app_context():
@@ -66,9 +75,9 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["message"], "method not allowed")
 
     def test_delete_question(self):
-        res = self.client().delete("/questions/29")
+        res = self.client().delete("/questions/5")
         data = json.loads(res.data)
-        question = Question.query.filter(Question.id == 29).one_or_none()
+        question = Question.query.filter(Question.id == 5).one_or_none()
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
 
@@ -86,11 +95,30 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(data["questions"]))
 
     def test_not_get_categories(self):
-        res = self.client().get("/categories/10323230/questions")
+        res = self.client().get("/categories/www/questions")
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 404)
  
-       
+    def test_search_quizzes(self):
+        res = self.client().post("/questions/search", json=self.search_word)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+
+    def test_not_search_quizzes(self):
+        res = self.client().post("/questions/searchhh", json=self.search_word)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        
+    def test_get_quiz_category(self):
+        res = self.client().post("/quizzes", json=self.quiz_page)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        # assertsame, assertarray, ドキュメントと見比べる、カテゴリ数と付き合わせてチェックする
+
+    def test_not_get_quiz_category(self):
+        res = self.client().post("/quizzess", json=self.quiz_page)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
