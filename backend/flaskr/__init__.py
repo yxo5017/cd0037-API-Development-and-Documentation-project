@@ -219,7 +219,7 @@ def create_app(test_config=None):
         quiz_category = body.get('quiz_category', None)
         previous_questions = body.get('previous_questions', None)
         print(quiz_category["id"])
-        if quiz_category["id"] != 1:
+        if quiz_category["id"] == 0:
             question_list = Question.query.all()
         else:
             question_list = Question.query.filter_by(category=quiz_category["id"]).all()
@@ -230,7 +230,10 @@ def create_app(test_config=None):
         print(question_id_list)
         if previous_questions:
             for question in question_list:
+                print("question_list")
+                print(len(question_list))
                 if question.id not in previous_questions:
+                    print("bbbba")
                     return jsonify({
                         "question": {
                             "id": question.id,
@@ -240,10 +243,17 @@ def create_app(test_config=None):
                             "category": question.category
                         }
                     })
+                    
                 else:
                     pass
+                    print("aaaaa")
+
+            return jsonify({
+                "question": False
+            })
         else:
             question = question_list[0]
+            print("ccca")
             return jsonify({
                 "question": {
                     "id": question.id,
@@ -253,6 +263,8 @@ def create_app(test_config=None):
                     "category": question.category
                 }
             })
+    # https://knowledge.udacity.com/questions/113018
+
     """
     @TODO:
     Create error handlers for all expected errors
